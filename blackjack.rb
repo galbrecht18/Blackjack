@@ -3,6 +3,7 @@
 #George Albrecht
 
 #Automatically stop when player has 21
+#Need to figure out how computer picks ace
 
 require 'pry'
 
@@ -27,7 +28,7 @@ def get_name
 
 end 
 
-def deal_cards deck, num_of_deals
+def deal_cards deck, num_of_deals, computer
 
   cards = []
   card_value = nil
@@ -35,10 +36,15 @@ def deal_cards deck, num_of_deals
   num_of_deals.times do
     random_suit = deck.keys.sample
     card_key = deck[random_suit].keys.sample
-    card_value = check_if_ace(card_key, card_value)
-    if card_value == nil then card_value = deck[random_suit].delete(card_key)
-    else deck[random_suit].delete(card_key) end 
-    cards << [random_suit, card_key, card_value]
+    if computer != "computer"
+      card_value = check_if_ace(card_key, card_value)
+      if card_value == nil then card_value = deck[random_suit].delete(card_key)
+      else deck[random_suit].delete(card_key) end 
+      cards << [random_suit, card_key, card_value]
+    else 
+      card_value = deck[random_suit].delete(card_key)
+      cards << [random_suit, card_key, card_value]
+    end 
   end 
 
   cards
@@ -89,7 +95,7 @@ def hit_or_stay deck, player_cards, player_total
   puts "Do you want to \'hit\' or \'stay\'?"
   choice = gets.chomp.to_s.upcase!
   if choice == 'HIT'
-    player_cards << deal_cards(deck, 1).flatten
+    player_cards << deal_cards(deck, 1, "player").flatten
     return player_cards
   elsif choice == 'STAY'
     puts "You have stayed. Your total is #{player_total}."
@@ -113,11 +119,11 @@ end
 def check_for_win player_total, computer_total
 
   if player_total > computer_total 
-    puts "You have #{player_total}, computer have #{computer_total}...You WIN!"
+    puts "You have #{player_total}, computer has #{computer_total}...You WIN!"
   elsif computer_total > player_total
     puts "Computer has #{computer_total}, you have #{player_total}...You lose sorry."
   else 
-    puts "Tie?!?"
+    puts "Tie?!? Computer Total = #{computer_total}. Your Total = #{player_total}."
   end 
 
 end 
@@ -132,10 +138,10 @@ begin
   #deal the cards
   puts "Dealing your cards..."
   sleep(1)
-  player_cards = deal_cards(deck, 2)
+  player_cards = deal_cards(deck, 2, "player")
   player_total = calculate_card_total(player_cards)
   out_put_cards_and_total(player_cards, player_total)
-  computer_cards = deal_cards(deck, 2)
+  computer_cards = deal_cards(deck, 2, "computer")
   computer_total = calculate_card_total(computer_cards)
 
   hit_or_stay = ''
@@ -148,8 +154,8 @@ begin
     if hit_or_stay && hit_or_stay != "STAY"
       player_cards = hit_or_stay
       player_total = calculate_card_total(player_cards)
-      puts "Your cards are #{player_cards}"
-      puts "Your total is #{player_total}."
+      puts "Your cards are: #{player_cards}"
+      puts "You total is #{player_total}."
 
     end 
 
@@ -163,7 +169,7 @@ begin
     puts "Bust! Computer won!"
   else 
     while computer_total < 17 do
-      computer_cards << deal_cards(deck, 1).flatten
+      computer_cards << deal_cards(deck, 1, "computer").flatten
       computer_total = calculate_card_total(computer_cards)
     end 
     computer_bust = check_for_bust(computer_total, 'Computer')
