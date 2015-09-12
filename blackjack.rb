@@ -2,7 +2,6 @@
 #9-8-2015 Initial Version
 #George Albrecht
 
-#Fix ACE Value (give option for either ace high or low)
 #Automatically stop when player has 21
 
 require 'pry'
@@ -31,15 +30,37 @@ end
 def deal_cards deck, num_of_deals
 
   cards = []
+  card_value = nil
 
   num_of_deals.times do
     random_suit = deck.keys.sample
     card_key = deck[random_suit].keys.sample
-    card_value = deck[random_suit].delete(card_key)
+    card_value = check_if_ace(card_key, card_value)
+    if card_value == nil then card_value = deck[random_suit].delete(card_key)
+    else deck[random_suit].delete(card_key) end 
     cards << [random_suit, card_key, card_value]
   end 
 
   cards
+
+end 
+
+def check_if_ace card_key, card_value
+
+  if card_key == 'Ace'
+    puts "Got an ace. Do you want ace high or ace low? (low/high)?"
+    ace_choice = gets.chop.to_s.upcase
+    if ace_choice == "HIGH"
+      card_value = 11
+      return card_value
+    elsif ace_choice == "LOW"
+      card_value = 1
+      return card_value
+    else 
+      puts "Not a valid input, please input (low/high)."
+      check_if_ace(card_key, card_value)
+    end 
+  end 
 
 end 
 
@@ -110,7 +131,7 @@ begin
 
   #deal the cards
   puts "Dealing your cards..."
-  sleep(2)
+  sleep(1)
   player_cards = deal_cards(deck, 2)
   player_total = calculate_card_total(player_cards)
   out_put_cards_and_total(player_cards, player_total)
