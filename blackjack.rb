@@ -2,12 +2,8 @@
 #9-8-2015 Initial Version
 #George Albrecht
 
-#Automatically stop when player has 21
-#Need to figure out how computer picks ace
-
 require 'pry'
 
-#does deck need to be a constant? Its being mutated throughout so not sure
 deck = {
   "Spades" => {"Ace"=>1, "2"=>2, "3"=>3, "4"=>4, "5"=>5, "6"=>6, 
     "7"=>7, "8"=>8, "9"=>9, "10"=>10, "Jack"=>10, "Queen"=>10, "King"=>10},
@@ -23,12 +19,14 @@ def get_name
 
   puts "What is your name?"
   player_name = gets.chomp
-  puts "Welcome and good luck #{player_name.capitalize!}"
+  if player_name.capitalize! == nil then player_name
+  else player_name.capitalize! end
+  puts "Welcome and good luck #{player_name}"
   player_name
 
 end 
 
-def deal_cards deck, num_of_deals, computer
+def deal_cards deck, num_of_deals, computer, computer_total
 
   cards = []
   card_value = nil
@@ -42,7 +40,9 @@ def deal_cards deck, num_of_deals, computer
       else deck[random_suit].delete(card_key) end 
       cards << [random_suit, card_key, card_value]
     else 
-      card_value = deck[random_suit].delete(card_key)
+      card_value = check_for_comp_ace(card_key, card_value, computer_total)
+      if card_value == nil then card_value = deck[random_suit].delete(card_key)
+      else deck[random_suit].delete(card_key) end 
       cards << [random_suit, card_key, card_value]
     end 
   end 
@@ -65,6 +65,20 @@ def check_if_ace card_key, card_value
     else 
       puts "Not a valid input, please input (low/high)."
       check_if_ace(card_key, card_value)
+    end 
+  end 
+
+end 
+
+def check_for_comp_ace card_key, card_value, computer_total
+
+  if card_key == 'Ace'
+    if (computer_total.to_i + 11) <= 21
+      card_value = 11
+      return card_value
+    else 
+      card_value = 1
+      return card_value
     end 
   end 
 
@@ -95,7 +109,7 @@ def hit_or_stay deck, player_cards, player_total
   puts "Do you want to \'hit\' or \'stay\'?"
   choice = gets.chomp.to_s.upcase!
   if choice == 'HIT'
-    player_cards << deal_cards(deck, 1, "player").flatten
+    player_cards << deal_cards(deck, 1, "player", nil).flatten
     return player_cards
   elsif choice == 'STAY'
     puts "You have stayed. Your total is #{player_total}."
@@ -138,10 +152,10 @@ begin
   #deal the cards
   puts "Dealing your cards..."
   sleep(1)
-  player_cards = deal_cards(deck, 2, "player")
+  player_cards = deal_cards(deck, 2, "player", nil)
   player_total = calculate_card_total(player_cards)
   out_put_cards_and_total(player_cards, player_total)
-  computer_cards = deal_cards(deck, 2, "computer")
+  computer_cards = deal_cards(deck, 2, "computer", nil)
   computer_total = calculate_card_total(computer_cards)
 
   hit_or_stay = ''
@@ -163,13 +177,11 @@ begin
 
   player_bust =  check_for_bust(player_total, player_name)
 
-  #right now if player stays, sometimes it hangs in loop
-
   if player_bust 
     puts "Bust! Computer won!"
   else 
     while computer_total < 17 do
-      computer_cards << deal_cards(deck, 1, "computer").flatten
+      computer_cards << deal_cards(deck, 1, "computer", computer_total).flatten
       computer_total = calculate_card_total(computer_cards)
     end 
     computer_bust = check_for_bust(computer_total, 'Computer')
