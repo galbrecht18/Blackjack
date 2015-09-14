@@ -19,9 +19,11 @@ def get_name
 
   puts "What is your name?"
   player_name = gets.chomp
-  if player_name.capitalize! == nil then player_name
-  else player_name.capitalize! end
-  puts "Welcome and good luck #{player_name}"
+  if player_name.capitalize == nil
+    player_name
+  else 
+    player_name.capitalize!
+  end
   player_name
 
 end 
@@ -104,10 +106,18 @@ def out_put_cards_and_total player_cards, player_total
 
 end 
 
+def out_put_cards player_cards
+
+  player_cards.each_index do |card|
+    puts "Your cards are: the #{player_cards[card][1]} of #{player_cards[card][0]}."
+  end 
+
+end 
+
 def hit_or_stay deck, player_cards, player_total
 
   puts "Do you want to \'hit\' or \'stay\'?"
-  choice = gets.chomp.to_s.upcase!
+  choice = gets.chomp.to_s.upcase
   if choice == 'HIT'
     player_cards << deal_cards(deck, 1, "player", nil).flatten
     return player_cards
@@ -122,11 +132,7 @@ end
 
 def check_for_bust card_total, name
 
-  if card_total > 21
-
-    bust = true
-
-  end 
+  card_total > 21 
 
 end 
 
@@ -142,12 +148,16 @@ def check_for_win player_total, computer_total
 
 end 
 
+player_name = ''
 #begin the game
 begin 
 
   system('clear')
   puts "Welcome to Blackjack!"
-  player_name = get_name
+  if player_name == ''
+    player_name = get_name
+  end 
+  puts "Good luck #{player_name}!"
 
   #deal the cards
   puts "Dealing your cards..."
@@ -168,7 +178,8 @@ begin
     if hit_or_stay && hit_or_stay != "STAY"
       player_cards = hit_or_stay
       player_total = calculate_card_total(player_cards)
-      puts "Your cards are: #{player_cards}"
+      out_put_cards(player_cards)
+      #puts "Your cards are: #{player_cards}"
       puts "You total is #{player_total}."
 
     end 
@@ -196,23 +207,4 @@ begin
   play_again = gets.chomp.to_s.upcase
 end until play_again != 'Y'
 puts "Thanks for playing #{player_name}!"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
